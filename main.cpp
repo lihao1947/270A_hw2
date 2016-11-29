@@ -39,8 +39,9 @@ void ElasticitySimulation(){
   parameters.k=(T)1;
   parameters.Newton_tol=(T)1e-8;
   parameters.max_newton_it=40;
-  parameters.final_time=(T)4;
-  parameters.frames_per_second=120;
+  parameters.final_time=(T)2;
+  parameters.frames_per_second=10;
+  parameters.tb = 2;
   JIXIE::ElasticityDriver<T> driver(parameters);
   bool verbose=true;
   driver.RunSimulation(verbose);
@@ -61,7 +62,7 @@ void ConvertBinaryToDat(){
     std::string positions_string(std::string("particle_x_")+frame_name);
     std::string velocities_string(std::string("particle_v_")+frame_name);
     FILE_IO::Write_DAT_File(std::string(output_dat_dir+std::string("/")+positions_string+std::string(".dat")),x);
-    FILE_IO::Write_DAT_File(std::string(output_dat_dir+std::string("/")+velocities_string+std::string(".dat")),x);
+    //FILE_IO::Write_DAT_File(std::string(output_dat_dir+std::string("/")+velocities_string+std::string(".dat")),x);
   }
 }
 

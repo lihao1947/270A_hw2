@@ -90,8 +90,10 @@ public:
   }
 
   void AddForce(TVect& force,const TVect& x,T scale=(T)1){
+    T P; cons_model.P(P, x(0)/dX);
+    force(0) -= scale * P;
     for(int e=0;e<N-1;e++){
-      T P;cons_model.P(P,F(x,e));
+      cons_model.P(P,F(x,e));
       force(e)+=scale*P;
       force(e+1)-=scale*P;
     }
@@ -106,6 +108,8 @@ public:
       for(int i=0;i<2;i++){
         for(int j=i;j<2;j++){
           A(e+i,e+j)+=element_stiffness(i,j);}}
+      //if (e == 0)
+        //  A(0,0) += element_stiffness(0,0);
     }
   }
 
@@ -120,6 +124,9 @@ public:
       for(int i=0;i<2;i++){
         for(int j=i;j<2;j++){
           dfdx(e+i,e+j)+=element_stiffness(i,j);}}
+      //Modified for boundary condition phi(0) = a.
+      //if (e == 0)
+      //    dfdx(0,0) += element_stiffness(0,0);
     }
     TVect df(N);df=TVect::Zero(N);
     dfdx.Multiply(dx,df);

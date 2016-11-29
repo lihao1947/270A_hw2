@@ -147,7 +147,7 @@ public:
   T k;
   T Newton_tol;
   int max_newton_it;
-
+  T tb; 
   ElasticityParameters(){}
 };
 
@@ -166,6 +166,7 @@ class ElasticityDriver: public SimulationDriver<T>{
   ConstitutiveModel<T>* cons_model;
   LagrangianForces<T>* lf;
   SymmetricTridiagonal<T> be_matrix;
+  T tb; // Modified
 public:
 
   ElasticityDriver(ElasticityParameters<T>& parameters):
@@ -175,6 +176,7 @@ public:
     //cons_model=new LinearElasticity<T>(k);
     cons_model=new NeoHookean<T>(k);
     lf=new FEMHyperelasticity<T>(a,dX,N,*cons_model);
+    tb = parameters.tb; // modified
   }
 
   ~ElasticityDriver(){
@@ -184,8 +186,9 @@ public:
 
   void Initialize(){
     //set intiial positions and velocity
+    //modified: x(0) is the second vectex. The first vertex is also at a. 
     for(int i=0;i<N;i++){
-      T x=(a+(T)i*dX);
+      T x=(a+(T)i*dX + dX);
       x_n(i)=(T).7*x;
       v_n(i)=(T)0;
     }
@@ -204,7 +207,9 @@ public:
 
     for(int it=1;it<max_newton_it;it++){
       residual=mass.asDiagonal()*(x_hat-x_np1);
-      lf->AddForce(residual,x_np1,dt*dt);
+      lf->AddForce(residual,x_np1,dt*dt); 
+      // Modified to include boundary condition du/dx(b,0)= c
+      residual(N-1) -= dt * dt* tb;
       T norm=(T)0;for(int i=0;i<N;i++) norm+=residual(i)*residual(i)/mass(i);
       norm=sqrt(norm);
       if(verbose)
